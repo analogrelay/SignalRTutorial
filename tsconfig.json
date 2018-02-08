@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "outDir": "wwwroot/js"
+  },
+  "include": [
+    "./ts/**/*.ts"
+  ]
+}
