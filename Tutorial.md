@@ -1,6 +1,10 @@
 # Simple Getting Started Tutorial
 (In outline form ;))
 
+Prerequisites: NodeJS
+
+0. Start with a Razor Pages app with Individual Auth.
+
 1. Add a `Hubs` directory and create a `BroadcastHub` class in it:
 
 ```csharp
