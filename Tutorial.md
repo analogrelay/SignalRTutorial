@@ -12,17 +12,17 @@ public class BroadcastHub: Hub
 {
     public override async Task OnConnectedAsync() 
     {
-        await Clients.All.InvokeAsync("Receive", $"{Context.ConnectionId} joined.");
+        await Clients.All.SendAsync("Receive", $"{Context.ConnectionId} joined.");
     }
 
     public override async Task OnDisconnectedAsync(Exception ex) 
     {
-        await Clients.All.InvokeAsync("Receive", $"{Context.ConnectionId} left.");
+        await Clients.All.SendAsync("Receive", $"{Context.ConnectionId} left.");
     }
 
     public async Task Broadcast(string message)
     {
-        await Clients.All.InvokeAsync("Receive", $"{Context.ConnectionId}: {message}");
+        await Clients.All.SendAsync("Receive", $"{Context.ConnectionId}: {message}");
     }
 }
 ```
@@ -82,16 +82,16 @@ public class BroadcastHub: Hub
 // Bind DOM elements
 const messagesList = document.getElementById("messages-list") as HTMLUListElement;
 const messageTextBox = document.getElementById("message-textbox") as HTMLInputElement;
-const sendButton = document.getElementById("send-button") as HTMLButtonElement;
+const messageForm = document.getElementById("message-form") as HTMLFormElement;
 
 (async function() {
     let connection = new signalR.HubConnection("/broadcast");
 
-    sendButton.addEventListener("click", async () => {
-        let message = messageTextBox.value;
-        await connection.send("Broadcast", message);
+    messageForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        await connection.send("Broadcast", messageTextBox.value);
     });
-
+    
     connection.on("Receive", message => {
         messagesList.innerHTML += `<li>${message}</li>`
     });
@@ -114,7 +114,9 @@ const sendButton = document.getElementById("send-button") as HTMLButtonElement;
 <p>SignalR Demo!</p>
 
 <div>
-    Message: <input type="text" id="message-textbox" /> <button id="send-button">Broadcast</button>
+    <form id="message-form">
+        Message: <input type="text" id="message-textbox" /> <button>Broadcast</button>
+    </form>
 </div>
 
 <ul id="messages-list"></ul>
