@@ -6,6 +6,9 @@ const messageTextBox = document.getElementById("message-textbox") as HTMLInputEl
 const sendButton = document.getElementById("send-button") as HTMLButtonElement;
 
 (async function() {
+    // Let the user's name
+    let name = prompt("Enter your user name");
+
     let connection = new signalR.HubConnection("/broadcast");
 
     sendButton.addEventListener("click", async () => {
