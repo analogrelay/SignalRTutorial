@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using SignalRTutorial.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SignalRTutorial.Hubs;
 
 namespace SignalRTutorial
 {
@@ -37,12 +38,17 @@ namespace SignalRTutorial
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddIdentity<IdentityUser, IdentityRole>(options => options.Stores.MaxLengthForKeys = 128)
+            services.AddIdentity<IdentityUser, IdentityRole>(options =>
+            {
+                options.Stores.MaxLengthForKeys = 128;
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,6 +72,11 @@ namespace SignalRTutorial
             app.UseAuthentication();
 
             app.UseMvc();
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ChatHub>("/signalr/chat");
+            });
         }
     }
 }
