@@ -1,37 +1,20 @@
 # Getting Started with SignalR Core Preview 1
 
-**TBD** SignalR is aweseome, blah blah
+SignalR is a library that simplifies the process of adding real-time web functionality to applications. With SignalR, you can build server applications that can "push" data to browsers and other clients without the client having to request or poll for the data. In ASP.NET Core 2.1 Preview 1, SignalR is now available for ASP.NET Core! This tutorial shows you how to get started with SignalR in ASP.NET Core 2.1 Preview 1.
 
 ## Building the UI
-
-**TBD** Global.json?
 
 Let's start by building a simple UI for a simple chat app. First, create a new Razor pages application using `dotnet new`:
 
 ```
 › dotnet new razor -au Individual --name SignalRTutorial
-The template "ASP.NET Core Web App" was created successfully.
-This template contains technologies from parties other than Microsoft, see https://aka.ms/template-3pn for details.
-
-Processing post-creation actions...
-Running 'dotnet restore' on SignalRTutorial/SignalRTutorial.csproj...
-  Restoring packages for /Users/anurse/Code/anurse/SignalRTutorial/tutorial/code/SignalRTutorial/SignalRTutorial.csproj...
-  Restoring packages for /Users/anurse/Code/anurse/SignalRTutorial/tutorial/code/SignalRTutorial/SignalRTutorial.csproj...
-  Restore completed in 139.33 ms for /Users/anurse/Code/anurse/SignalRTutorial/tutorial/code/SignalRTutorial/SignalRTutorial.csproj.
-  Restore completed in 621.09 ms for /Users/anurse/Code/anurse/SignalRTutorial/tutorial/code/SignalRTutorial/SignalRTutorial.csproj.
-  Generating MSBuild file /Users/anurse/Code/anurse/SignalRTutorial/tutorial/code/SignalRTutorial/obj/SignalRTutorial.csproj.nuget.g.props.
-  Generating MSBuild file /Users/anurse/Code/anurse/SignalRTutorial/tutorial/code/SignalRTutorial/obj/SignalRTutorial.csproj.nuget.g.targets.
-  Restore completed in 1.72 sec for /Users/anurse/Code/anurse/SignalRTutorial/tutorial/code/SignalRTutorial/SignalRTutorial.csproj.
-
-Restore succeeded.
 ```
 
 Add a new page for the chat UI:
 
 ```
-> cd SignalRTutorial/Pages
-> dotnet new page --name Chat
-The template "Razor Page" was created successfully.
+› cd SignalRTutorial/Pages
+› dotnet new page --name Chat
 ```
 
 You should now have `Pages/Chat.cshtml` and `Pages/Chat.cshtml.cs` files in your project. First, open `Pages/Chat.cshtml.cs`, change the namespace name to match your other page models and add the `Authorize` attribute to ensure only authenticated users can access the 
@@ -266,3 +249,7 @@ connection.start();
 ## Testing it out
 
 With all that code in place, it should be ready to go. Use `dotnet run` to launch the app and give it a try! Then, use a Private Browsing window and log in as a different user. You should be able to chat back and forth between the browser windows.
+
+## Conclusion
+
+This has been a brief overview of how to get started with SignalR in ASP.NET Core 2.1 Preview 1. Check out the [full code for this tutorial](https://github.com/anurse/SignalRTutorial) if you'd like to see more details. If you need help, post questions on [StackOverflow](https://stackoverflow.com) using the `asp.net-core` tag. Finally, if you think you've found a bug, file it on our [GitHub repository](https://github.com/aspnet/SignalR).
