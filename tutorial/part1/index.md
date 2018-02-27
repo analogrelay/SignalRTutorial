@@ -1,6 +1,14 @@
-# Getting Started with SignalR Core Preview 1
+# Getting Started with SignalR for ASP.NET Core 2.1 Preview 1
 
 SignalR is a library that simplifies the process of adding real-time web functionality to applications. With SignalR, you can build server applications that can "push" data to browsers and other clients without the client having to request or poll for the data. In ASP.NET Core 2.1 Preview 1, SignalR is now available for ASP.NET Core! This tutorial shows you how to get started with SignalR in ASP.NET Core 2.1 Preview 1.
+
+## Prerequisites
+
+In order to use this template you need the following tools:
+
+1. .NET Core SDK version 2.1.300 or higher.
+2. Node JS (just needed for NPM, to download the SignalR JavaScript library; we strongly recommend using at least version 8.9.4 of Node).
+3. Your IDE/Editor of choice.
 
 ## Building the UI
 
@@ -17,7 +25,7 @@ Add a new page for the chat UI:
 › dotnet new page --name Chat
 ```
 
-You should now have `Pages/Chat.cshtml` and `Pages/Chat.cshtml.cs` files in your project. First, open `Pages/Chat.cshtml.cs`, change the namespace name to match your other page models and add the `Authorize` attribute to ensure only authenticated users can access the 
+You should now have `Pages/Chat.cshtml` and `Pages/Chat.cshtml.cs` files in your project. First, open `Pages/Chat.cshtml.cs`, change the namespace name to match your other page models and add the `Authorize` attribute to ensure only authenticated users can access the Hubs.
 
 ```csharp
 using System;
@@ -83,17 +91,17 @@ namespace SignalRTutorial.Hubs
     {
         public override async Task OnConnectedAsync()
         {
-            await Clients.All.SendAsync("ReceiveAction", Context.User.Identity.Name, "joined");
+            await Clients.All.SendAsync("SendAction", Context.User.Identity.Name, "joined");
         }
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
-            await Clients.All.SendAsync("ReceiveAction", Context.User.Identity.Name, "left");
+            await Clients.All.SendAsync("SendAction", Context.User.Identity.Name, "left");
         }
 
         public async Task Send(string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", $"{Context.User.Identity.Name}: {message}");
+            await Clients.All.SendAsync("SendMessage", $"{Context.User.Identity.Name}: {message}");
         }
     }
 }
@@ -101,9 +109,9 @@ namespace SignalRTutorial.Hubs
 
 Let's go back over that code a little bit and look at what it does. First, we have a class inheriting from `Hub`, which is the base class required for all SignalR Hubs. We apply the `[Authorize]` attribute to it which restricts access to the Hub to registered users and ensures that `Context.User` is available for us in the Hub methods. Inside Hub methods, you can use the `Clients` property to access various collections of clients. We use the `.All` property, which gives us an object that can be used to send messages to every client connected to the Hub.
 
-When a new client connects, the `OnConnectedAsync` method will be invoked. We override that method to Send the `ReceiveAction` message to every client, and provide two arguments: The name of the user, and the action that occurred (in this case, that they "joined" the chat session). We do the same for `OnDisconnectedAsync`, which is invoked when a client disconnects.
+When a new client connects, the `OnConnectedAsync` method will be invoked. We override that method to Send the `SendAction` message to every client, and provide two arguments: The name of the user, and the action that occurred (in this case, that they "joined" the chat session). We do the same for `OnDisconnectedAsync`, which is invoked when a client disconnects.
 
-When a client invokes the `Send` method, we Send the `ReceiveMessage` message to every client, again providing two arguments: The name of the user sending the message and the message itself. Every client will receive this message, including the sending client itself.
+When a client invokes the `Send` method, we Send the `SendMessage` message to every client, again providing two arguments: The name of the user sending the message and the message itself. Every client will receive this message, including the sending client itself.
 
 To finish off the server-side, we need to add SignalR to our application. We do that in the `Startup.cs` file. First, in the `ConfigureServices` method, add the following to the end of that method to register the necessary SignalR services into the DI container:
 
@@ -125,47 +133,29 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 
     app.UseSignalR(routes =>
     {
-        routes.MapHub<ChatHub>("/chat");
+        routes.MapHub<ChatHub>("/hubs/chat");
     });
 }
 ```
+
+This configures the hub so that it is available at the URL `/hubs/chat`. You can use any URL you want, but it can't match an existing MVC action or Razor Page.
 
 **NOTE**: You'll need to add a using directive for `SignalRTutorial.Hubs` in order to use `ChatHub` in your `MapHub` call.
 
 ## Building the client-side
 
-Now that we have the server hub up and running, we need to add code to the `Chat.cshtml` page to use the client. First, however, we need to get the SignalR JavaScript client and add it to our application. There are many ways you can do this, such as using a bundling tool like Webpack, but here we're going to go with a fairly simple approach of copying and pasting ;).
+Now that we have the server hub up and running, we need to add code to the `Chat.cshtml` page to use the client. First, however, we need to get the SignalR JavaScript client and add it to our application. There are many ways you can do this, such as using a bundling tool like Webpack, but here we're going to go with a fairly simple approach of copying and pasting.
 
 First, create a `package.json` file to hold JavaScript dependencies for the application:
 
 ```
 › npm init -y
-Wrote to /Users/anurse/Code/anurse/SignalRTutorial/tutorial/code/SignalRTutorial/package.json:
-
-{
-  "name": "SignalRTutorial",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
-}
 ```
 
 Then, install the SignalR client:
 
 ```
-› npm i @aspnet/signalr
-npm notice created a lockfile as package-lock.json. You should commit this file.
-npm WARN SignalRTutorial@1.0.0 No description
-npm WARN SignalRTutorial@1.0.0 No repository field.
-
-+ @aspnet/signalr@1.0.0-preview2-30113
-added 1 package in 1.54s
+› npm install @aspnet/signalr
 ```
 
 You can find the version of the client designed for use in Browsers in `node_modules/@aspnet/signalr/dist/browser`. There are minified files there as well. For now, let's just copy the `signalr.js` file out of that directory and into `wwwroot/lib/signalr` in the project:
@@ -183,7 +173,13 @@ Now, we can add JavaScript to our `Chat.cshtml` page to wire everything up. At t
         var messagesList = document.getElementById("messages-list");
         var messageTextBox = document.getElementById("message-textbox");
 
-        var connection = new signalR.HubConnection("/chat");
+        function appendMessage(content) {
+            var li = document.createElement("li");
+            li.innerText = content;
+            messagesList.appendChild(li);
+        }
+
+        var connection = new signalR.HubConnection("/hubs/chat");
 
         sendForm.addEventListener("submit", function() {
             var message = messageTextBox.value;
@@ -191,12 +187,12 @@ Now, we can add JavaScript to our `Chat.cshtml` page to wire everything up. At t
             connection.send("Send", message);
         });
 
-        connection.on("ReceiveMessage", function (sender, message) {
-            messagesList.innerHTML += '<li>' + sender + ': ' + message + '</li>';
+        connection.on("SendMessage", function (sender, message) {
+            appendMessage(sender + ': ' + message);
         });
 
-        connection.on("ReceiveAction", function (sender, action) {
-            messagesList.innerHTML += '<li>' + sender + ' ' + message + '</li>';
+        connection.on("SendAction", function (sender, action) {
+            appendMessage(sender + ' ' + action);
         });
 
         connection.start();
@@ -210,10 +206,10 @@ We put our scripts in the `Scripts` Razor section, in order to ensure they end u
 <script src="/lib/signalr.js"></script>
 ```
 
-Then, we add a script block for our own code. In that code, we create a new connection, connecting to the URL we specified back in the `Configure` method.
+Then, we add a script block for our own code. In that code, we first get references to some DOM elements, and define a helper function to add a new item to the `messages-list` list. Then, we create a new connection, connecting to the URL we specified back in the `Configure` method.
 
 ```javascript
-var connection = new signalR.HubConnection("/chat");
+var connection = new signalR.HubConnection("/hubs/chat");
 ```
 
 At this point, the connection has not yet been opened. We need to call `connection.start()` to open the connection. However, before we do that we have some set-up to do.
@@ -228,15 +224,15 @@ sendForm.addEventListener("submit", function() {
 });
 ```
 
-Then, we wire up handlers for the `ReceiveAction` and `ReceiveMessage` messages (remember back in the Hub we use the `SendAsync` method to send those messages, so we need a handler on the client for them):
+Then, we wire up handlers for the `SendMessage` and `SendAction` messages (remember back in the Hub we use the `SendAsync` method to send those messages, so we need a handler on the client for them):
 
 ```javascript
-connection.on("ReceiveMessage", function (sender, message) {
-    messagesList.innerHTML += '<li>' + sender + ': ' + message + '</li>';
+connection.on("SendMessage", function (sender, message) {
+    appendMessage(sender + ': ' + message);
 });
 
-connection.on("ReceiveAction", function (sender, action) {
-    messagesList.innerHTML += '<li>' + sender + ' ' + message + '</li>';
+connection.on("SendAction", function (sender, action) {
+    appendMessage(sender + ' ' + action);
 });
 ```
 
