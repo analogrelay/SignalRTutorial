@@ -56,7 +56,7 @@ namespace SignalRTesting
 
             app.UseSignalR(routes =>
             {
-                routes.MapHub<BroadcastHub>("/broadcast");
+                routes.MapHub<ChatHub>("/hubs/chat");
             });
         }
     }
